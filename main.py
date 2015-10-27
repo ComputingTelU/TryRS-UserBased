@@ -104,8 +104,8 @@ def getPredictedRating(user, item):
 	predicted = yAvgUser + (atas / bawah)
 	return predicted
 
-print getNeighbours(5)
+# print getNeighbours(5)
 # print getSimiliarity(0,410)
 # print getAverageRating(getItemRating(0))
-# predicted = getPredictedRating(0, 100)
-# print "Predicted :", predicted
+predicted = getPredictedRating(0, 100)
+print "Predicted :", predicted

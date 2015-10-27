@@ -13,7 +13,7 @@ def getData(filename):
   sheet = data.sheet_by_index(0)
   return sheet
 
-DATA = getData("jester-data-1500.xls")
+DATA = getData("../jester-data-1500.xls")
 SHEET_ROWS = DATA.nrows
 SHEET_COLUMN = DATA.ncols
 

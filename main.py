@@ -19,7 +19,8 @@ SHEET_COLUMN = DATA.ncols
 
 # Fungsi untuk mendapatkan rating dari 1 item berdasarkan user
 def getRating(user, item):
-	return DATA.row(user)[item].value
+	val = DATA.row(user)[item].value
+	return 0 if val >= 99 else val
 
 # Fungsi untuk mendapatkan rating dari seluruh item berdasarkan user
 def getItemRating(user):
@@ -34,15 +35,15 @@ def getItemRating(user):
 def getAverageRating(rates):
 	total = []
 	for i in rates:
-		temp = 0 if i >= 99 else i
-		total.append(temp)
+		if i < 99 :
+			total.append(i)
 	listTotal = np.array(total)
 	return np.mean(listTotal)
 
 # Fungsi untuk mendapatkan semua neighbour dari user
 def getNeighbours(user):
 	neighbour = []
-	for i in range(SHEET_ROWS):
+	for i in range(1,SHEET_ROWS):
 		if i != user :
 			for j in range(SHEET_COLUMN):
 				yUser = getRating(user, j)
@@ -60,15 +61,21 @@ def getSimiliarity(user1, user2):
 	yAvgUser2 = getAverageRating(getItemRating(user2))
 	atas = 0
 	bawah = 0
-	for i in range(SHEET_COLUMN) :
-		yUser1 = getRating(user1, i)
+	for i in range(1,SHEET_COLUMN) :
+		yUser1  = getRating(user1, i)
 		yUser2 = getRating(user2, i)
-		atas += (yUser1 - yAvgUser1) * (yUser2 - yAvgUser2)
+		# print "yuser1 : ", yUser1
+		# print "yuser2 : ", yUser2
+		if yUser1 != 0 and yUser2 != 0 :
+			atas += (yUser1 - yAvgUser1) * (yUser2 - yAvgUser2)
 	yUser1a = 0
 	yUser2a = 0
-	for i in range(SHEET_COLUMN) :
-		yUser1a += (yUser1 - yAvgUser1) ** 2
-		yUser2a += (yUser2 - yAvgUser2) ** 2
+	for i in range(1,SHEET_COLUMN) :
+		yUser1  = getRating(user1, i)
+		yUser2 = getRating(user2, i)
+		if yUser1 != 0 and yUser2 != 0 :
+			yUser1a += (yUser1 - yAvgUser1) ** 2
+			yUser2a += (yUser2 - yAvgUser2) ** 2
 	bawah = math.sqrt(yUser1a * yUser2a)
 	sim = atas / bawah
 	return sim
@@ -97,5 +104,8 @@ def getPredictedRating(user, item):
 	predicted = yAvgUser + (atas / bawah)
 	return predicted
 
+print getNeighbours(5)
+# print getSimiliarity(0,410)
 # print getAverageRating(getItemRating(0))
-print getPredictedRating(0, 100)
+# predicted = getPredictedRating(0, 100)
+# print "Predicted :", predicted

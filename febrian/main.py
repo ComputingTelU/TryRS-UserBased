@@ -13,7 +13,7 @@ def getData(filename):
   sheet = data.sheet_by_index(0)
   return sheet
 
-DATA = getData("../jester-data-1500.xls")
+DATA = getData("../jester-data-100.xls")
 SHEET_ROWS = DATA.nrows
 SHEET_COLUMN = DATA.ncols
 
@@ -27,7 +27,6 @@ def getItemRating(user):
 	rating = []
 	for item in range(1, SHEET_COLUMN):
 		rating += [getRating(user, item)]
-	# return rating
 	listRating = np.array(rating)
 	return listRating
 
@@ -45,10 +44,11 @@ def getNeighbours(user):
 	neighbour = []
 	for i in range(1,SHEET_ROWS):
 		if i != user :
-			for j in range(SHEET_COLUMN):
+			for j in range(1, SHEET_COLUMN):
 				yUser = getRating(user, j)
 				yNeighbour = getRating(i, j)
-				if (yUser < 99) and (yNeighbour < 99) :
+				if (yUser > 0) and (yNeighbour > 0) :
+					# print 'user',i,'item',j,'yNeighbour :', yNeighbour,'oke'
 					neighbour += [i]
 					break
 	# return neighbour
@@ -64,8 +64,6 @@ def getSimiliarity(user1, user2):
 	for i in range(1,SHEET_COLUMN) :
 		yUser1  = getRating(user1, i)
 		yUser2 = getRating(user2, i)
-		# print "yuser1 : ", yUser1
-		# print "yuser2 : ", yUser2
 		if yUser1 != 0 and yUser2 != 0 :
 			atas += (yUser1 - yAvgUser1) * (yUser2 - yAvgUser2)
 	yUser1a = 0
@@ -92,20 +90,25 @@ def getPredictedRating(user, item):
 	neighbours = getNeighbours(user)
 	atas = 0
 	bawah = 0
-	# for i in range(SHEET_COLUMN):
- 	for j in range(len(neighbours)):
+ 	for j in range(len(neighbours) - 1):
  		similiarities = getSimiliarity(neighbours[j], user)
  		tempRating = getRating(neighbours[j], item)
  		rating = 0 if tempRating >= 99 else tempRating
  		yAvgNeighbour = getAverageRating(getItemRating(neighbours[j]))
- 		print "User",user, " | User",neighbours[j], " - Similiarities :", similiarities, " - rating :", rating, " - avg :", yAvgNeighbour 
+ 		# print "User",user, " | User",neighbours[j], " - Similiarities :", similiarities, " - rating :", rating, " - avg :", yAvgNeighbour 
  		atas += similiarities * (rating - yAvgNeighbour)
  		bawah += abs(similiarities)
 	predicted = yAvgUser + (atas / bawah)
 	return predicted
 
-# print getNeighbours(5)
-# print getSimiliarity(0,410)
-# print getAverageRating(getItemRating(0))
-predicted = getPredictedRating(0, 100)
-print "Predicted :", predicted
+def getAllItemPrediction(user):
+	rates = [getPredictedRating(user, item) for item in range(1, SHEET_COLUMN)]
+	return rates;
+
+def getMAE(user):
+	for item in range(1, SHEET_COLUMN):
+		atas = abs(getPredictedRating(user, item)) - abs(getRating(user, item))
+	mae = atas / (SHEET_COLUMN - 1)
+	return abs(mae)
+
+print getAllItemPrediction(1)

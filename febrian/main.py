@@ -34,7 +34,7 @@ def getItemRating(user):
 def getAverageRating(rates):
 	total = []
 	for i in rates:
-		if i < 99 :
+		if i != 0 :
 			total.append(i)
 	listTotal = np.array(total)
 	return np.mean(listTotal)

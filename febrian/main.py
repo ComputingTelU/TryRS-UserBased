@@ -3,7 +3,7 @@ __author__ = 'Febrian Imanda Effendy'
 import xlrd
 import numpy as np
 import math
-
+import json
 # sh = data.sheet_by_index(0)
 # print sh.name, sh.nrows, sh.ncols
 # for rx in range(sh.nrows):
@@ -95,20 +95,38 @@ def getPredictedRating(user, item):
  		tempRating = getRating(neighbours[j], item)
  		rating = 0 if tempRating >= 99 else tempRating
  		yAvgNeighbour = getAverageRating(getItemRating(neighbours[j]))
- 		# print "User",user, " | User",neighbours[j], " - Similiarities :", similiarities, " - rating :", rating, " - avg :", yAvgNeighbour 
+ 		# print "User",user, " - Item",item," | User",neighbours[j], " - Similiarities :", similiarities, " - rating :", rating, " - avg :", yAvgNeighbour 
  		atas += similiarities * (rating - yAvgNeighbour)
  		bawah += abs(similiarities)
 	predicted = yAvgUser + (atas / bawah)
+	print "User",user," - Item",item," | predicted = ", predicted
 	return predicted
 
-def getAllItemPrediction(user):
+def getAllItemsPrediction(user):
 	rates = [getPredictedRating(user, item) for item in range(1, SHEET_COLUMN)]
 	return rates;
 
-def getMAE(user):
-	for item in range(1, SHEET_COLUMN):
-		atas = abs(getPredictedRating(user, item)) - abs(getRating(user, item))
+def getMAE(user, ofile = False):
+	atas = 0
+	if ofile :
+		with open (ofile, "r") as myfile :
+			data = myfile.read().replace('[', '').replace(']','').replace(' ','').split(',')
+		for item in range(1, SHEET_COLUMN) :
+			ri = getRating(user, item)
+			print ri
+			if ri != 0 :
+				atas += abs(float(data[item-1]) - getRating(user,item))
+	else : 
+		for item in range(1, SHEET_COLUMN):
+			atas += abs(getPredictedRating(user, item)) - abs(getRating(user, item))
 	mae = atas / (SHEET_COLUMN - 1)
 	return abs(mae)
 
-print getAllItemPrediction(1)
+def main():
+	result = {}
+	for user in range(0,SHEET_ROWS):
+		print "===== user -",user," ====="
+		result[user] = getAllItemsPrediction(user)
+	json.dump(result,'result.json',indent=2)
+
+main()

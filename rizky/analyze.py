@@ -2,30 +2,24 @@ __author__ = 'Rizky Solechudin'
 
 import xlrd #import library pembaca excel
 import math
-import os
-filename = "../jester-data-100.xls"
-
-def checkFile(filename):
-	if os.path.isfile(filename):
-		print "File: ",filename
-	else:
-		print "Failed to open file"
+import csv
 
 def getData(filename):
 	book = xlrd.open_workbook(filename) #open file jester
 	sh = book.sheet_by_index(0) #masukkan isi file jester matrix sh
 	return sh
 
+filename = "../jester-data-100.xls"
 dataTemp = getData(filename)
 COLS_COUNT = dataTemp.ncols
 ROWS_COUNT = dataTemp.nrows
-COLS_COUNT = COLS_COUNT
 ROWS_COUNT = ROWS_COUNT - 2 #perbaikan perhitungan total baris pada file jester
+
+data = [[0 for x in range(COLS_COUNT)] for x in range(ROWS_COUNT)]
+result = [[0 for x in range(COLS_COUNT)] for x in range(ROWS_COUNT)]
 
 def getRatingTemp (user,item): 
 	return dataTemp.row(user)[item].value #return value dari matrix sh
-
-data = [[0 for x in range(COLS_COUNT)] for x in range(ROWS_COUNT)]
 
 for x in range(ROWS_COUNT): #masukkan data jester kedalam array
 	for y in range(COLS_COUNT):
@@ -135,12 +129,21 @@ def getPredictedRating(n,i): #get prediksi rating antara user n dengan item i
 		totalBot = totalBot + bot
 	return avgN + totalTop/totalBot 
 
+def writeCSV(result):
+	fl = open("jester-data-result.csv","w")
+	writer = csv.writer(fl)
+	for values in result:
+		writer.writerow(values)
+	fl.close()
+
 def main():
-	print checkFile(filename)
 	print "Total kolom: ",COLS_COUNT
 	print "Total baris: ",ROWS_COUNT
 	for i in range(ROWS_COUNT): 
-		for j in range(1,COLS_COUNT):
-	 		print "User " ,i,", Item ", j, " : ", getPredictedRating(i,j) #get semua predicted rating yang ada
- 
+		result[i][0] = 100
+		for j in range(1,COLS_COUNT): 
+			result[i][j] = (getPredictedRating(i,j))
+	 		print "User " ,i,", Item ", j, " : ", result[i][j] #get semua predicted rating yang ada
+	writeCSV(result)
+
 main()
